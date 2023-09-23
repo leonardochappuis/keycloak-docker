@@ -1,8 +1,8 @@
 ARG KEYCLOAK_USER
 ARG KEYCLOAK_PASSWORD
-ARG DB_URL	
-ARG DB_USERNAME
-ARG DB_PASSWORD
+ARG DATABASE_URL	
+ARG DATABASE_USERNAME
+ARG DATABASE_PASSWORD
 ARG KEYCLOAK_VERSION=22.0.3
 
 FROM quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}
@@ -13,8 +13,8 @@ ENV KEYCLOAK_ADMIN_PASSWORD=$KEYCLOAK_PASSWORD
 ENV KEYCLOAK_PASSWORD=$KEYCLOAK_PASSWORD
 ENV KEYCLOAK_USER=$KEYCLOAK_USER
 ENV PROXY_ADDRESS_FORWARDING=true
-ENV DB_URL=$DB_URL
-ENV DB_USERNAME=$DB_USERNAME
-ENV DB_PASSWORD=$DB_PASSWORD
+ENV DB_URL=$DATABASE_URL
+ENV DB_USERNAME=$DATABASE_USERNAME
+ENV DB_PASSWORD=$DATABASE_PASSWORD
 		
-CMD ["start", "--hostname-strict=false", "--http-port=$PORT", "--proxy=edge", "--db=postgres", "--db-url=$DB_URL", "--db-username=$DB_USERNAME", "--db-password=$DB_PASSWORD", "--features=\"preview,scripts\""]
+CMD ["start", "--optimized", "--hostname-strict=false", "--http-port=$PORT", "--proxy=edge", "--db=postgres", "--db-url=$DB_URL", "--db-username=$DB_USERNAME", "--db-password=$DB_PASSWORD", "--features=\"preview,scripts\""]
