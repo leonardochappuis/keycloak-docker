@@ -17,4 +17,4 @@ ENV DB_URL=$DATABASE_URL
 ENV DB_USERNAME=$DATABASE_USERNAME
 ENV DB_PASSWORD=$DATABASE_PASSWORD
 		
-CMD ["start", "--optimized", "--hostname-strict=false", "--http-port=$PORT", "--proxy=edge", "--db=postgres", "--db-url=$DB_URL", "--db-username=$DB_USERNAME", "--db-password=$DB_PASSWORD", "--features=\"preview,scripts\""]
+CMD ["start", "--hostname-strict=false", "--http-port=$PORT", "--proxy=edge", "--db=postgres", "--db-url=$DB_URL", "--db-username=$DB_USERNAME", "--db-password=$DB_PASSWORD", "--features=\"preview,scripts\""]
