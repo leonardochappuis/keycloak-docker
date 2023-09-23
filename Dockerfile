@@ -2,7 +2,7 @@
 # Keycloak image built for postgresql support with theme handling customisation
 # to always fallback to standard openremote theme.
 # ------------------------------------------------------------------------------------
-ARG VERSION=:22.0.3
+ARG VERSION=22.0.3
 FROM quay.io/keycloak/keycloak:${VERSION}
 
 WORKDIR /opt/keycloak
