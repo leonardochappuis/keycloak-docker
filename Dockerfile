@@ -1,35 +1,28 @@
-FROM quay.io/keycloak/keycloak:latest as builder
+FROM quay.io/keycloak/keycloak:latest AS base
 
-ARG DB_URL
-ARG DB_USERNAME
-ARG DB_PASSWORD
-ARG KEYCLOAK_USER
-ARG KEYCLOAK_PASSWORD
-
-# Railway should automatically specify this port
-ARG PORT
+FROM base AS builder
 
 ENV KC_HEALTH_ENABLED=true
 ENV KC_METRICS_ENABLED=true
 ENV KC_FEATURES=token-exchange
 ENV KC_DB=postgres
 
-RUN /opt/keycloak/bin/kc.sh build --db=postgres
+ADD --chown=keycloak:keycloak https://github.com/klausbetz/apple-identity-provider-keycloak/releases/download/1.7.0/apple-identity-provider-1.7.0.jar /opt/keycloak/providers/apple-identity-provider-1.7.0.jar
 
-ENV KEYCLOAK_ADMIN=admin
-ENV KEYCLOAK_ADMIN_PASSWORD=admin
+COPY /themes/keywind/theme/keywind /opt/keycloak/themes/keywind
 
-ENV KC_HTTP_PORT=$PORT
-ENV KC_HTTP_HOST=0.0.0.0
-ENV KC_PROXY=edge
-ENV KEYCLOAK_ADMIN=$KEYCLOAK_USER
-ENV KEYCLOAK_ADMIN_PASSWORD=$KEYCLOAK_PASSWORD
-ENV KEYCLOAK_PASSWORD=$KEYCLOAK_PASSWORD
-ENV KEYCLOAK_USER=$KEYCLOAK_USER
-ENV PROXY_ADDRESS_FORWARDING=true
-ENV KC_DB_URL=$DB_URL
-ENV KC_DB_USERNAME=$DB_USERNAME
-ENV KC_DB_PASSWORD=$DB_PASSWORD
+COPY /realms /opt/keycloak/data/import
 
-EXPOSE $PORT
-CMD ["start", "--hostname-strict=false", "--http-port=$PORT", "--proxy=edge", "--db=postgres", "--db-url=$DB_URL", "--db-username=$DB_USERNAME", "--db-password=$DB_PASSWORD", "--features=\"preview,scripts\""]
+RUN /opt/keycloak/bin/kc.sh build 
+
+FROM base AS final
+
+COPY java.config /etc/crypto-policies/back-ends/java.config
+
+WORKDIR /opt/keycloak
+
+COPY --from=builder /opt/keycloak/ ./
+
+ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
+
+CMD ["start", "--optimized", "--proxy", "edge", "--hostname", "${RAILWAY_STATIC_URL}", "--import-realm", "--db=postgres", "--db-url", "jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}", "--db-username", "${PGUSER}", "--db-password", "${PGPASSWORD}"]
