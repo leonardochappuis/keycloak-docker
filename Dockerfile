@@ -11,8 +11,6 @@ ADD --chown=keycloak:keycloak https://github.com/klausbetz/apple-identity-provid
 
 COPY /themes/keywind/theme/keywind /opt/keycloak/themes/keywind
 
-COPY /realms /opt/keycloak/data/import
-
 RUN /opt/keycloak/bin/kc.sh build 
 
 FROM base AS final
