@@ -9,8 +9,6 @@ ENV KC_DB=postgres
 
 ADD --chown=keycloak:keycloak https://github.com/klausbetz/apple-identity-provider-keycloak/releases/download/1.7.0/apple-identity-provider-1.7.0.jar /opt/keycloak/providers/apple-identity-provider-1.7.0.jar
 
-COPY /themes/keywind/theme/keywind /opt/keycloak/themes/keywind
-
 RUN /opt/keycloak/bin/kc.sh build 
 
 FROM base AS final
