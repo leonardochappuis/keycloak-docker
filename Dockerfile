@@ -32,4 +32,4 @@ ENV KC_DB_USERNAME=$DB_USERNAME
 ENV KC_DB_PASSWORD=$DB_PASSWORD
 
 EXPOSE $PORT
-CMD ["start"]
+CMD ["start", "--hostname-strict=false", "--http-port=$PORT", "--proxy=edge", "--db=postgres", "--db-url=$DB_URL", "--db-username=$DB_USERNAME", "--db-password=$DB_PASSWORD", "--features=\"preview,scripts\""]
