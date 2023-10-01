@@ -19,9 +19,7 @@ FROM base AS final
 ENV QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY=true
 
 COPY java.config /etc/crypto-policies/back-ends/java.config
-
 WORKDIR /opt/keycloak
-
 COPY --from=builder /opt/keycloak/ ./
 
 ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
