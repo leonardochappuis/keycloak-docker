@@ -23,4 +23,4 @@ COPY --from=builder /opt/keycloak/ ./
 
 ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
 
-CMD ["start", "--log-level=ALL", "-spi-dblock-jpa-lock-wait-timeout", "3000", "--optimized", "--proxy", "edge", "--hostname", "${RAILWAY_STATIC_URL}", "--import-realm", "--db=postgres", "--db-url", "jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}", "--db-username", "${PGUSER}", "--db-password", "${PGPASSWORD}"]
+CMD ["start", "--log-level=ALL", "--spi-dblock-jpa-lock-wait-timeout", "3000", "--optimized", "--proxy", "edge", "--hostname", "${RAILWAY_STATIC_URL}", "--import-realm", "--db=postgres", "--db-url", "jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}", "--db-username", "${PGUSER}", "--db-password", "${PGPASSWORD}"]
