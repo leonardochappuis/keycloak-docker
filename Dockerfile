@@ -1,33 +1,31 @@
-FROM quay.io/keycloak/keycloak:latest AS base
+FROM quay.io/keycloak/keycloak AS builder
 
-FROM base AS builder
-
-ENV KC_HEALTH_ENABLED=true
-ENV KC_METRICS_ENABLED=true
-ENV KC_FEATURES=token-exchange
-ENV KC_DB=postgres
-
-ENV JAVA_OPTS='-Djboss.bind.address.private=127.0.0.1 -Djboss.bind.address=0.0.0.0 -Djava.net.preferIPv6Addresses=true'
-ENV KC_HOSTNAME_STRICT="false"
-ENV KC_HTTP_ENABLED="true"
-ENV PROXY_ADDRESS_FORWARDING="true"
-
-ENV QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY=true
+ARG KC_HEALTH_ENABLED KC_METRICS_ENABLED KC_FEATURES KC_DB KC_HTTP_ENABLED PROXY_ADDRESS_FORWARDING QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY KC_HOSTNAME KC_LOG_LEVEL KC_DB_POOL_MIN_SIZE
 
 ADD --chown=keycloak:keycloak https://github.com/klausbetz/apple-identity-provider-keycloak/releases/download/1.7.1/apple-identity-provider-1.7.1.jar /opt/keycloak/providers/apple-identity-provider-1.7.1.jar
 ADD --chown=keycloak:keycloak https://github.com/wadahiro/keycloak-discord/releases/download/v0.5.0/keycloak-discord-0.5.0.jar /opt/keycloak/providers/keycloak-discord-0.5.0.jar
 COPY /theme/keywind /opt/keycloak/themes/keywind
 
-RUN /opt/keycloak/bin/kc.sh build 
+RUN /opt/keycloak/bin/kc.sh build
 
-FROM base AS final
+FROM fedora AS bins
 
-ENV QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY=true
+RUN curl -fsSL https://github.com/caddyserver/caddy/releases/download/v2.7.4/caddy_2.7.4_linux_amd64.tar.gz | tar -zxvf - caddy
+RUN curl -fsSL https://github.com/nicolas-van/multirun/releases/download/1.1.3/multirun-x86_64-linux-gnu-1.1.3.tar.gz | tar -zxvf - multirun
+
+FROM quay.io/keycloak/keycloak
 
 COPY java.config /etc/crypto-policies/back-ends/java.config
-WORKDIR /opt/keycloak
-COPY --from=builder /opt/keycloak/ ./
 
-ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
+COPY --from=builder /opt/keycloak/ /opt/keycloak/
 
-CMD ["start", "--log-level=WARN", "--spi-dblock-jpa-lock-wait-timeout", "2147483646", "--optimized", "--proxy", "edge", "--hostname", "${RAILWAY_PUBLIC_DOMAIN}", "--import-realm", "--db=postgres", "--db-url", "jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}", "--db-username", "${PGUSER}", "--db-password", "${PGPASSWORD}"]
+COPY --from=bins --chmod=0755 /multirun /usr/bin/multirun
+COPY --from=bins --chmod=0755 /caddy /usr/bin/caddy
+
+WORKDIR /app
+
+COPY Caddyfile ./
+
+ENTRYPOINT ["multirun"]
+
+CMD ["/opt/keycloak/bin/kc.sh start --optimized --import-realm", "caddy run 2>&1"]
