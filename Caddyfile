@@ -1,0 +1,12 @@
+{
+	admin off
+	persist_config off
+	auto_https off
+	servers {
+		trusted_proxies static private_ranges
+	}
+}
+
+:{$PORT} {
+	reverse_proxy http://127.0.0.1:{$KC_HTTP_PORT}
+}
