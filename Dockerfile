@@ -34,6 +34,12 @@ COPY java.config /etc/crypto-policies/back-ends/java.config
 
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
 
+# Railway's private network between replicas is dual-stack, but on a dual-stack
+# interface JGroups' TCP transport defaults to binding its IPv4 address, which is
+# not routable pod-to-pod on Railway (only IPv6 is). Force IPv6 selection so the
+# JGroups TCP stack binds/advertises an address peers can actually reach.
+ENV JAVA_OPTS_APPEND="-Djava.net.preferIPv6Addresses=true"
+
 ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
 
 CMD ["start", "--optimized", "--import-realm", "--cache-config-file=cache-ispn.xml"]
