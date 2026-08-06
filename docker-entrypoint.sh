@@ -15,9 +15,6 @@ set -e
 # scope 00 = global/ULA (fd12:...) -- prefer that one over link-local (fe80::,
 # scope 20) since it's the address JGroups can advertise cluster-wide.
 RAILNET0_IPV6=$(grep ' railnet0$' /proc/net/if_inet6 2>/dev/null | grep ' 00 80 ' | cut -d' ' -f1 | head -1)
-if [ -z "$RAILNET0_IPV6" ]; then
-  RAILNET0_IPV6=$(grep ' railnet0$' /proc/net/if_inet6 2>/dev/null | cut -d' ' -f1 | head -1)
-fi
 
 if [ -n "$RAILNET0_IPV6" ]; then
   RAILNET0_IPV6=$(echo "$RAILNET0_IPV6" | sed -E 's/(.{4})/\1:/g; s/:$//')
