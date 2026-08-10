@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  keycloak:
+    image: keycloaktest
+    container_name: keycloaktest
+    ports:
+      - "8080:8080"
+    environment:
+      KEYCLOAK_ADMIN: "admin"
+      KEYCLOAK_ADMIN_PASSWORD: "admin123"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      - ./theme/keywind:/opt/keycloak/themes/keywind
+    command:
+      - start-dev
+      - --import-realm
+      - --spi-theme-static-max-age=-1
+      - --spi-theme-cache-themes=false
+      - --spi-theme-cache-templates=false
+
+volumes:
+  keycloak_data:
+
